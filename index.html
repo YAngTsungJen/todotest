@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="./todo.png">
+    <link rel="apple-touch-icon" href="./todo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./todo.png">
+    <title>隨手記事</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>待辦事項</h1>
+        <button id="delAllBtn" class="btn secondary">全部刪除</button>
+    </header>
+
+    <section class="card">
+        <div class="new-task">
+            <div class="row">
+                <input id="taskInput" type="text" placeholder="新增任務內容 (按 Enter 新增)" />
+            </div>
+
+            <div class="row">
+                <select id="categorySelect">
+                    </select>
+
+                <select id="prioritySelect">
+                    <option value="urgent">緊急</option>
+                    <option value="important">重要</option>
+                    <option value="normal">一般</option>
+                </select>
+
+                <button id="addBtn" class="btn">新增</button>
+            </div>
+
+            <div class="row">
+                <input id="searchInput" type="text" placeholder="搜尋任務或標籤" />
+            </div>
+        </div>
+
+        <div style="margin-top:12px" class="list-area">
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="progress">進行中</button>
+                <button class="filter-btn" data-filter="done">已完成</button>
+            </div>
+
+            <div class="todo-list" id="todoList"></div>
+
+            <div id="noProgress" class="empty-state" style="display:none">目前沒有任務</div>
+        </div>
+    </section>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+        <h3 id="modalTitle">確認</h3>
+        <div id="modalBody" style="margin-top:10px;color:var(--muted)"></div>
+        <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+            <button id="modalCancel" class="btn secondary">取消</button>
+            <button id="modalConfirm" class="btn">確認</button>
+        </div>
+    </div>
+</div>
+
+<script src="./all.js"></script>
+
+</body>
+</html>
