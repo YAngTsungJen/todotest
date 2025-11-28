@@ -72,8 +72,11 @@ input:focus, select:focus, textarea:focus{
 }
 
 /* Modal 裡的輸入框 (基礎樣式) */
-.modal input[type="date"], .modal input[type="time"], .modal select{
-    font-size:16px; /* Modal 裡字體小一點 */
+.modal input[type="text"], /* <-- 新增: 確保文字輸入框的字體大小安全 */
+.modal input[type="date"], 
+.modal input[type="time"], 
+.modal select{
+    font-size:16px; /* 確保字體不小於 16px，以阻止 iOS/Safari 自動放大 */
     padding:10px 12px;
 }
 
@@ -242,7 +245,7 @@ input:focus, select:focus, textarea:focus{
 }
 .modal h3{font-size:24px;margin-top:0;}
 
-/* --- Modal 內部表單優化 (新增) --- */
+/* --- Modal 內部表單優化 --- */
 .modal-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
