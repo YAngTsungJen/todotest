@@ -1,105 +1,132 @@
 :root{
-            /* 🟧 改成 #EA7500 主題色 */
-            --primary:#EA7500;
-            --primary-dark:#c46000;
+    /* 主題色 */
+    --primary:#EA7500;
+    --primary-dark:#c46000;
 
-            --bg:#fdf7f2;
-            --card:#ffffff;
-            --muted:#6b7280;
-            --success:#22c55e;
-            --danger:#ef4444;
-            --important:#f59e0b;
-            --low:#10b981;
+    --bg:#fdf7f2;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --success:#22c55e;
+    --danger:#ef4444;
+    --important:#f59e0b;
+    --low:#10b981;
 
-            --font-size:24px;
-            --radius:14px;
-        }
+    --font-size:18px; /* 稍微縮小字體以提高資訊密度 */
+    --radius:14px;
+}
 
-        /* 基礎重置 */
-        *, *::before, *::after{box-sizing:border-box}
-        html,body{height:100%;margin:0;overflow-x:hidden}
-        body{
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans TC', 'Helvetica Neue', Arial;
-            background:linear-gradient(180deg, #fff7f0 0%, var(--bg) 100%);
-            padding:28px;color:#0b1726;-webkit-font-smoothing:antialiased;
-        }
+/* 基礎重置 */
+*, *::before, *::after{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow-x:hidden}
+body{
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans TC', 'Helvetica Neue', Arial;
+    background:linear-gradient(180deg, #fff7f0 0%, var(--bg) 100%);
+    padding:28px;color:#0b1726;-webkit-font-smoothing:antialiased;
+    line-height:1.5; /* 增加行高 */
+}
 
-        /* 🟧 刪除 sidebar → 改成一欄版 */
-        .container{
-            width:100%;
-            max-width:900px;
-            margin:0 auto;
-            display:grid;
-            grid-template-columns:1fr;
-            gap:24px;
-            align-items:start;
-            padding:0 12px;
-        }
+/* 版面配置 */
+.container{
+    width:100%;
+    max-width:900px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:24px;
+    align-items:start;
+    padding:0 12px;
+}
 
-        header{display:flex;justify-content:space-between;align-items:center;gap:16px}
-        h1{margin:0;font-size:32px;color:var(--primary)}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+h1{margin:0;font-size:38px;color:var(--primary)}
 
-        .card{
-            background:var(--card);
-            border-radius:var(--radius);
-            padding:18px;
-            box-shadow:0 6px 18px rgba(3,19,55,0.06);
-        }
+.card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:24px; /* 增加卡片內邊距 */
+    box-shadow:0 12px 20px rgba(3,19,55,0.08); /* 更明顯的陰影 */
+}
 
-        /* 新增區塊 */
-        .new-task{display:flex;flex-direction:column;gap:12px}
-        .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-        .row > *{min-width:0}
+/* 新增區塊 */
+.new-task{display:flex;flex-direction:column;gap:16px} /* 增加間距 */
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row > *{min-width:0}
 
-        input[type="text"], select, textarea, input[type="date"], input[type="time"]{
-            font-size:var(--font-size);padding:10px 12px;border-radius:10px;
-            background:#fff;width:100%;outline:none;transition:box-shadow .12s;
-            border:1px solid rgba(3,19,55,0.06)
-        }
-        /* 讓日期時間輸入框在 Modal 裡小一點，更好看 */
-        .modal input[type="date"], .modal input[type="time"]{
-            font-size:20px;
-        }
-        textarea{resize:vertical;min-height:56px}
+/* 讓 select 和 button 在控制列中平分空間 */
+.new-task .controls select{
+    flex:1 1 0; /* 讓 select 平均佔據空間 */
+    min-width:120px;
+}
+.new-task .controls #addBtn{
+    flex:0 0 auto; /* 讓按鈕維持原大小 */
+}
 
-        /* 🟧 主題色按鈕 */
-        .btn{
-            background:var(--primary);
-            color:#fff;border:none;padding:12px 16px;
-            border-radius:10px;cursor:pointer;font-size:18px;
-            box-shadow:0 6px 14px rgba(234,117,0,0.25);
-        }
-        .btn.secondary{
-            background:transparent;color:var(--primary);
-            border:1px solid rgba(234,117,0,0.25);
-            box-shadow:none;
-        }
+input[type="text"], select, textarea, input[type="date"], input[type="time"]{
+    font-size:var(--font-size);padding:12px 14px;border-radius:10px;
+    background:#fff;width:100%;outline:none;transition:box-shadow .12s, border-color .12s;
+    border:1px solid #e0e0e0;
+}
+input:focus, select:focus, textarea:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 2px #fde6d8;
+}
 
-        /* 列表區 */
-        .list-area{display:flex;flex-direction:column;gap:12px}
-        .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* Modal 裡的輸入框 */
+.modal input[type="date"], .modal input[type="time"], .modal select{
+    font-size:16px; /* Modal 裡字體小一點 */
+    padding:10px 12px;
+}
 
-        .filter-btn{
-            background:transparent;border:none;padding:8px 12px;border-radius:999px;
-            cursor:pointer;font-size:16px;color:var(--muted);white-space:nowrap
-        }
-        .filter-btn.active{
-            background:linear-gradient(90deg,var(--primary)11%,#ea750022);
-            color:var(--primary);box-shadow:inset 0 -2px 0 rgba(0,0,0,0.04)
-        }
+/* 主題色按鈕 */
+.btn{
+    background:var(--primary);
+    color:#fff;border:none;padding:12px 18px; /* 增加按鈕內距 */
+    border-radius:10px;cursor:pointer;font-size:16px;
+    box-shadow:0 4px 10px rgba(234,117,0,0.3);
+    transition:background .2s, box-shadow .2s;
+    white-space:nowrap;
+}
+.btn:hover{background:var(--primary-dark)}
+.btn.secondary{
+    background:transparent;color:var(--primary);
+    border:1px solid var(--primary); /* 邊框也用主題色 */
+    box-shadow:none;
+}
+.btn.secondary:hover{
+    background:rgba(234,117,0,0.05);
+}
 
-/* 🟧 Ultra-minimal 細色條版本 ------------------------ */
+/* 列表區 */
+.list-area{display:flex;flex-direction:column;gap:16px}
+.filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #f0f0f0;padding-bottom:8px}
 
-/* todo item 外框 */
+.filter-btn{
+    background:transparent;border:none;padding:8px 14px;border-radius:999px;
+    cursor:pointer;font-size:16px;color:var(--muted);white-space:nowrap
+}
+.filter-btn.active{
+    background:var(--primary);
+    color:#fff;
+    box-shadow:0 2px 4px rgba(234,117,0,0.3);
+}
+.filter-btn:not(.active):hover{
+    color:var(--primary);
+}
+
+/* Todo Item */
 .todo{
     display:flex;
-    align-items:flex-start;
-    gap:14px;
-    padding:12px 14px;
-    border-radius:10px;
+    align-items:center; /* 垂直置中 */
+    gap:16px;
+    padding:14px 16px; /* 增加內距 */
+    border-radius:12px;
     background:#ffffff;
-    border:1px solid #f5e7dd; /* 更淡的邊框 */
+    border:1px solid #f5e7dd;
     position:relative;
+    transition:background-color .2s;
+}
+.todo:hover{
+    background-color:#fffdfc;
 }
 
 /* 左側細色條（依優先度不同） */
@@ -109,77 +136,145 @@
     left:0;
     top:0;
     bottom:0;
-    width:6px;
-    border-radius:10px 0 0 10px;
+    width:5px;
+    border-radius:12px 0 0 12px;
     background:var(--primary); /* fallback */
 }
 .todo[data-priority="urgent"]::before{ background:var(--danger); }
 .todo[data-priority="important"]::before{ background:var(--important); }
 .todo[data-priority="normal"]::before{ background:var(--low); }
 
-/* checkbox 更細、更極簡 */
+/* checkbox */
 .check{
     appearance:none;
-    width:22px;
-    height:22px;
-    border:2px solid var(--primary);
+    width:24px;
+    height:24px;
+    border:2px solid #ccc;
     border-radius:6px;
     cursor:pointer;
     position:relative;
     background:#fff;
     transition:0.2s;
+    flex-shrink:0; /* 不壓縮 */
+}
+.check:hover{
+    border-color:var(--primary);
 }
 .check.checked{
-    background:#fff;
+    background:var(--primary);
+    border-color:var(--primary);
 }
 .check.checked::after{
     content:"";
     position:absolute;
     inset:0;
     margin:auto;
-    width:10px;
-    height:18px;
-    border-right:3px solid var(--primary);
-    border-bottom:3px solid var(--primary);
+    width:5px;
+    height:10px;
+    border-right:3px solid #fff;
+    border-bottom:3px solid #fff;
     transform:rotate(45deg);
 }
 
+.content{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+.content .title{
+    font-size:20px;margin:0;margin-bottom:4px;word-break:break-word;
+    font-weight:600;
+}
+.content .meta{
+    font-size:14px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;
+    align-items:center;
+}
 
-        .content{flex:1 1 auto;min-width:0}
-        .content .title{
-            font-size:var(--font-size);margin:0;margin-bottom:4px;word-break:break-word
-        }
-        .content .meta{
-            font-size:14px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap
-        }
+/* 編輯中的輸入框/選擇框 */
+.editable.editing{
+    width:100%;
+    font-size:inherit;
+    padding:4px 6px;
+}
 
-        .tags{display:flex;gap:8px;flex-wrap:wrap}
-        .tag{
-            padding:6px 10px;border-radius:999px;font-size:14px;
-            background:#fff1e6;color:var(--primary);border:1px solid #ffd8b8
-        }
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{
+    padding:4px 10px;border-radius:999px;font-size:13px;
+    background:#fff1e6;color:var(--primary);border:1px solid #ffd8b8;
+    cursor:pointer;
+}
 
-        .actions{display:flex;gap:8px;align-items:center}
+/* 優先度顏色（將其作為文字顏色而非單獨標籤） */
+.priority.urgent{color:var(--danger); font-weight:bold;}
+.priority.important{color:var(--important); font-weight:bold;}
+.priority.normal{color:var(--low); font-weight:bold;}
 
-        /* 空狀態（sidebar 刪除後仍可保留） */
-        .empty-state{
-            padding:18px;border-radius:12px;
-            background:linear-gradient(180deg,#fffaf4,#ffffff);
-            text-align:center;color:var(--muted)
-        }
+.actions{display:flex;gap:4px;align-items:center;flex-shrink:0}
 
-        /* Modal */
-        .modal-backdrop{
-            position:fixed;inset:0;background:rgba(4,12,28,0.4);
-            display:none;align-items:center;justify-content:center;z-index:60
-        }
-        .modal{
-            background:var(--card);padding:18px;border-radius:12px;
-            min-width:280px;max-width:92vw;
-            box-shadow:0 10px 30px rgba(3,19,55,0.18)
-        }
+/* 極簡風格的圖標按鈕 */
+.icon-btn{
+    background:transparent;border:none;padding:6px;border-radius:8px;
+    cursor:pointer;font-size:18px;color:var(--muted);
+    transition:background-color .1s, color .1s;
+}
+.icon-btn:hover{
+    background:rgba(0,0,0,0.05);
+    color:#333;
+}
+.icon-btn[title="刪除"]:hover{
+    color:var(--danger);
+}
 
-        @media (max-width:480px){
-            body{padding:12px;font-size:16px}
-            .title{font-size:26px}
-        }
+/* 空狀態 */
+.empty-state{
+    padding:30px;border-radius:12px;
+    background:linear-gradient(180deg,#fffaf4,#ffffff);
+    text-align:center;color:var(--muted);
+    font-size:18px;
+    border:2px dashed #f0e0d0;
+}
+
+/* Modal */
+.modal-backdrop{
+    position:fixed;inset:0;background:rgba(4,12,28,0.6); /* 增加背景不透明度 */
+    display:none;align-items:center;justify-content:center;z-index:60
+}
+.modal{
+    background:var(--card);padding:24px;border-radius:16px;
+    min-width:320px;max-width:92vw;
+    box-shadow:0 10px 30px rgba(3,19,55,0.2)
+}
+.modal h3{font-size:24px;margin-top:0;}
+
+/* 行動裝置優化 */
+@media (max-width:600px){
+    body{padding:16px;}
+    .container{padding:0;}
+    h1{font-size:32px;}
+    .card{padding:16px;}
+
+    .new-task .controls{
+        flex-direction:column;
+        gap:10px;
+    }
+    .new-task .controls select,
+    .new-task .controls #addBtn{
+        width:100%;
+        flex:1 1 100%;
+    }
+    
+    .todo{
+        padding:12px 14px;
+        flex-wrap:wrap; /* 任務內容和按鈕換行 */
+        align-items:flex-start;
+    }
+    .todo .content{
+        flex:1 1 100%; /* 任務內容佔滿一行 */
+        order:1;
+        margin-left:40px; /* 對齊標題和 checkbox */
+    }
+    .todo .actions{
+        order:0;
+        margin-left:auto; /* 推到最右邊 */
+    }
+    .todo .left{
+        order:0;
+        flex-shrink:0;
+    }
+}

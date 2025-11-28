@@ -23,7 +23,7 @@
                 <input id="taskInput" type="text" placeholder="新增任務內容 (按 Enter 新增)" />
             </div>
 
-            <div class="row">
+            <div class="row controls">
                 <select id="categorySelect">
                     </select>
 
@@ -41,7 +41,7 @@
             </div>
         </div>
 
-        <div style="margin-top:12px" class="list-area">
+        <div style="margin-top:20px" class="list-area">
             <div class="filters">
                 <button class="filter-btn active" data-filter="all">全部</button>
                 <button class="filter-btn" data-filter="progress">進行中</button>
@@ -55,7 +55,7 @@
     </section>
 </div>
 
-<div id="modalBackdrop" class="modal-backdrop">
+<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
     <div class="modal">
         <h3 id="modalTitle">確認</h3>
         <div id="modalBody" style="margin-top:10px;color:var(--muted)"></div>

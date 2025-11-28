@@ -5,8 +5,6 @@
 
     let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
     let categories = JSON.parse(localStorage.getItem(CATEGORIES_KEY)) || DEFAULT_CATEGORIES; 
-    let notificationAllowed = 'default';
-    const notificationTimers = {}; // 用於儲存提醒計時器
 
     // DOM
     const taskInput = document.getElementById('taskInput');
@@ -45,58 +43,6 @@
     function createTask(text, category='其他', priority='normal', dueDate=null, dueTime='23:59'){
       return {id:uid(),text,category,priority,done:false,created:Date.now(),dueDate,dueTime}
     }
-
-    // --- 通知提醒功能 ---
-    
-    // 請求通知權限
-    function requestNotificationPermission(){
-        if(!('Notification' in window)) {
-            console.warn('瀏覽器不支援通知');
-            alert('您的瀏覽器不支援提醒通知功能。');
-            return;
-        }
-        
-        Notification.requestPermission().then(permission => {
-            notificationAllowed = permission;
-            if(permission === 'granted'){
-                alert('已成功取得通知權限！');
-            } else {
-                alert('未允許通知，將無法收到提醒。');
-            }
-        });
-    }
-
-    // 設定任務提醒
-    function setTaskNotifications(){
-        // 清除所有舊的計時器
-        Object.values(notificationTimers).forEach(clearTimeout);
-        Object.keys(notificationTimers).forEach(key => delete notificationTimers[key]);
-
-        if(notificationAllowed !== 'granted') return; 
-
-        const now = Date.now();
-        
-        tasks.filter(t => t.dueDate && !t.done).forEach(t => {
-            const [year, month, day] = t.dueDate.split('-').map(Number);
-            const [hour, minute] = (t.dueTime || '23:59').split(':').map(Number);
-            
-            // 月份是 0-indexed，需要減 1
-            const dueTimeMs = new Date(year, month-1, day, hour, minute, 0).getTime();
-            
-            const delay = dueTimeMs - now;
-
-            if(delay > 0){
-                notificationTimers[t.id] = setTimeout(() => {
-                    new Notification('⏰ 待辦事項提醒', {
-                        body: t.text + ' (' + t.category + ')',
-                        icon: './todo.png' 
-                    });
-                    delete notificationTimers[t.id]; 
-                }, delay);
-            }
-        });
-    }
-
 
     // --- 類別管理功能 ---
 
@@ -247,7 +193,7 @@
 
       // 顯示『進行中沒任務』訊息
       const progressCount = tasks.filter(t=>!t.done).length;
-      noProgress.style.display = progressCount===0 ? 'block':'none';
+      noProgress.style.display = progressCount===0 && currentFilter !== 'done' ? 'block':'none';
 
       if(visible.length===0){
         const empty = document.createElement('div');
@@ -274,7 +220,6 @@
         const content = document.createElement('div'); content.className='content';
         const title = document.createElement('h4'); title.className='title editable';
         title.textContent = t.text;
-        title.style.fontSize = 'var(--font-size)';
         if(t.done) title.style.textDecoration = 'line-through';
 
         // 雙擊編輯標題
@@ -283,24 +228,23 @@
         const meta = document.createElement('div'); meta.className='meta';
 
         const tagWrap = document.createElement('div'); tagWrap.className='tags';
-        const catTag = document.createElement('button'); catTag.className='tag'; catTag.textContent = t.category;
+        
+        // 類別標籤
+        const catTag = document.createElement('button'); 
+        catTag.className='tag'; catTag.textContent = t.category;
+        catTag.title = '雙擊編輯分類';
         catTag.addEventListener('dblclick', ()=> openCategoryEditor(t, catTag));
-
-        const pri = document.createElement('span'); pri.className='priority ' + t.priority; pri.title='優先度';
-
         tagWrap.appendChild(catTag);
-        tagWrap.appendChild(pri);
-        
-        // 顯示創建日期
-        const time = document.createElement('div');
-        const d = new Date(t.created);
-        time.textContent = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
-        time.style.marginLeft='6px';
 
-        meta.appendChild(tagWrap);
-        meta.appendChild(time);
+        // 顯示優先度
+        const pri = document.createElement('span'); 
+        pri.className='priority ' + t.priority; 
+        pri.title='優先度';
+        const priMap = { 'urgent': '⚡ 緊急', 'important': '⭐ 重要', 'normal': '🟢 一般' };
+        pri.textContent = priMap[t.priority] || t.priority;
+        meta.appendChild(pri);
         
-        // ⬇️ 顯示截止日期時間
+        // 顯示截止日期時間
         if(t.dueDate){
             const dueDisplay = document.createElement('span');
             dueDisplay.className = 'due-date';
@@ -308,22 +252,29 @@
             dueDisplay.style.color = t.done ? 'var(--muted)' : 'var(--danger)'; 
             
             const dueText = `${t.dueDate} ${t.dueTime || '23:59'}`;
-            dueDisplay.textContent = '🚨 ' + dueText;
-            dueDisplay.style.marginLeft = '12px'; // 和創建日期隔開
+            dueDisplay.textContent = '📅 ' + dueText;
 
             meta.appendChild(dueDisplay);
         }
 
+        // 顯示創建日期
+        const time = document.createElement('span');
+        const d = new Date(t.created);
+        time.textContent = `建立於 ${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+        time.style.marginLeft='auto'; // 推到最右邊
+
+        meta.appendChild(time);
+        
         content.appendChild(title);
         content.appendChild(meta);
 
         const actions = document.createElement('div'); actions.className='actions';
         const editBtn = document.createElement('button'); editBtn.className='icon-btn'; editBtn.innerHTML='✏️';
-        editBtn.title='編輯';
+        editBtn.title='編輯細節';
         editBtn.addEventListener('click', ()=> openFullEdit(t));
 
         const delBtn = document.createElement('button'); delBtn.className='icon-btn'; delBtn.innerHTML='🗑️';
-        delBtn.title='刪除';
+        delBtn.title='刪除任務';
         delBtn.addEventListener('click', ()=> confirmModal('刪除此任務？', async ()=>{ tasks = tasks.filter(x=>x.id!==t.id); save(); render(); } ))
 
         actions.appendChild(editBtn);
@@ -335,9 +286,6 @@
 
         todoList.appendChild(el);
       })
-      
-      // 重新設定所有提醒
-      setTaskNotifications();
     }
 
     // 內嵌編輯（雙擊）
@@ -345,8 +293,8 @@
       if(titleEl.classList.contains('editing')) return;
       titleEl.classList.add('editing');
       const input = document.createElement('input');
-      input.type='text'; input.value=task.text; input.style.fontSize='var(--font-size)';
-      input.className='editable';
+      input.type='text'; input.value=task.text; 
+      input.className='editable editing';
       titleEl.replaceWith(input);
       input.focus();
       function commit(){ task.text = input.value.trim() || task.text; save(); render(); }
@@ -363,7 +311,7 @@
       const manageOption = document.createElement('option');
       manageOption.value = 'manage'; manageOption.textContent = '⚙️ 管理類別'; sel.appendChild(manageOption);
       
-      sel.className='editable';
+      sel.className='editable editing';
       tagEl.replaceWith(sel); sel.focus();
       sel.addEventListener('change', ()=>{ 
         if(sel.value === 'manage'){
@@ -381,10 +329,20 @@
       modalTitle.textContent = isNew ? '設定任務細節' : '編輯任務';
       modalBody.innerHTML = '';
       const form = document.createElement('div');
-      form.style.display='grid'; form.style.gap='8px'
-      
+      form.style.display='grid'; 
+      form.style.gap='12px';
+      form.style.gridTemplateColumns = '1fr 1fr'; // 讓日期和時間並排
+
+      const tLabel = document.createElement('div'); tLabel.textContent = '任務內容';
+      const cLabel = document.createElement('div'); cLabel.textContent = '分類';
+      const pLabel = document.createElement('div'); pLabel.textContent = '優先度';
+      const dLabel = document.createElement('div'); dLabel.textContent = '截止日期';
+      const tmLabel = document.createElement('div'); tmLabel.textContent = '截止時間';
+
       // 文字
-      const tInput = document.createElement('input'); tInput.value = task.text; tInput.style.fontSize='20px';
+      const tInput = document.createElement('input'); 
+      tInput.value = task.text; 
+      tInput.style.gridColumn = '1 / span 2'; // 佔滿兩欄
       
       // 分類
       const cSel = document.createElement('select'); 
@@ -398,26 +356,20 @@
       // 優先
       const pSel = document.createElement('select'); [['urgent','緊急'],['important','重要'],['normal','一般']].forEach(a=>{const o=document.createElement('option');o.value=a[0];o.textContent=a[1]; if(a[0]===task.priority) o.selected=true; pSel.appendChild(o)});
 
-      // ⬇️ 日期和時間輸入
+      // 日期和時間輸入
       const dInput = document.createElement('input'); dInput.type = 'date'; dInput.value = task.dueDate || '';
       const tmInput = document.createElement('input'); tmInput.type = 'time'; tmInput.value = task.dueTime || '23:59';
       
-      // 提醒按鈕
-      const reminderBtn = document.createElement('button');
-      reminderBtn.className = 'btn secondary';
-      reminderBtn.style.fontSize = '14px';
-      reminderBtn.textContent = (notificationAllowed === 'granted') ? '✅ 已允許通知' : '🔔 請求通知權限';
-      reminderBtn.onclick = requestNotificationPermission;
-
+      // 添加元素到表單 (調整順序以符合 grid 排版)
       form.appendChild(tInput); 
       form.appendChild(cSel); 
       form.appendChild(pSel);
+      
       form.appendChild(dInput); 
       form.appendChild(tmInput); 
-      form.appendChild(reminderBtn);
 
       modalBody.appendChild(form);
-
+      
       // 顯示 modal
       showModal();
       modalConfirm.onclick = ()=>{
@@ -434,8 +386,14 @@
     }
 
     // modal helpers
-    function showModal(){ modalBackdrop.style.display='flex'; modalBackdrop.setAttribute('aria-hidden','false'); }
-    function hideModal(){ modalBackdrop.style.display='none'; modalBackdrop.setAttribute('aria-hidden','true'); }
+    function showModal(){ 
+        modalBackdrop.style.display='flex'; 
+        modalBackdrop.setAttribute('aria-hidden','false'); 
+    }
+    function hideModal(){ 
+        modalBackdrop.style.display='none'; 
+        modalBackdrop.setAttribute('aria-hidden','true'); 
+    }
 
     // 用於確認動作的 modal
     function confirmModal(message, onConfirm){
@@ -454,7 +412,6 @@
 
     // 初始畫面
     renderCategorySelect(); // 載入類別
-    requestNotificationPermission(); // 請求通知權限
     render();
 
     // 範例資料（如果沒有資料則建立 demo，並增加日期欄位）
@@ -471,4 +428,16 @@
     }
 
     // Accessibility: Esc 關閉 modal
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hideModal(); })
+    document.addEventListener('keydown', (e)=>{ 
+        if(e.key==='Escape' && modalBackdrop.getAttribute('aria-hidden') === 'false') {
+            hideModal(); 
+            // 如果是在管理類別介面，需要額外清理
+            if(modalTitle.textContent === '管理類別'){
+                 // 恢復原本的確認/取消按鈕
+                document.querySelector('.modal > div:last-child').style.display = 'flex'; 
+                categorySelect.value = categories[0] || '其他';
+                renderCategorySelect();
+            }
+            render();
+        } 
+    })
