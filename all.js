@@ -48,7 +48,7 @@
       return {id:uid(),text,category,priority,done:false,created:Date.now(),dueDate,dueTime}
     }
     
-    // --- 通知提醒功能 ---
+    // --- 通知提醒功能 (無變動) ---
     
     // 請求通知權限
     function requestNotificationPermission(){
@@ -476,30 +476,6 @@
       confirmModal('確定要刪除全部任務？此動作無法復原。', ()=>{ tasks = []; save(); render(); })
     })
 
-    // 初始畫面
-    renderCategorySelect(); // 載入類別
-    // 首次載入時，請求通知權限
-    if(Notification.permission === 'default') {
-        // 如果還沒詢問過，在初始化時先請求一次權限，防止用戶錯過 Modal 裡的按鈕。
-        // 但這裡我們保持在 Modal 裡提醒，因為太早彈出可能讓用戶拒絕。
-    } else {
-        notificationAllowed = Notification.permission;
-    }
-    render();
-
-    // 範例資料（如果沒有資料則建立 demo，並增加日期欄位）
-    if(tasks.length===0){
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowDate = tomorrow.toISOString().split('T')[0];
-      
-      tasks.push(createTask('晨跑 30 分鐘', '運動', 'normal', null, null));
-      tasks.push(createTask('整理工作報告', '工作', 'urgent', tomorrowDate, '10:00'));
-      tasks.push(createTask('閱讀 30 分鐘英文', '自我成長', 'important', tomorrowDate, '20:30'));
-      save(); render();
-    }
-
     // Accessibility: Esc 關閉 modal
     document.addEventListener('keydown', (e)=>{ 
         if(e.key==='Escape' && modalBackdrop.getAttribute('aria-hidden') === 'false') {
@@ -514,3 +490,38 @@
             render();
         } 
     })
+
+
+    // 🚀 初始化應用程式：確保載入順序正確 (修復載入問題的關鍵)
+    function initialize(){
+        // 1. 載入並渲染類別
+        renderCategorySelect(); 
+        
+        // 2. 檢查並設定通知權限狀態，如果還沒詢問過，主動詢問
+        if ('Notification' in window) {
+            notificationAllowed = Notification.permission;
+            if(notificationAllowed === 'default') {
+                // 首次載入時主動詢問通知權限 (解決通知功能失敗的原因之一：未授權)
+                requestNotificationPermission(); 
+            }
+        }
+        
+        // 3. 檢查任務，若為空則建立範例資料 (修復載入時資料呈現不正確的問題)
+        if(tasks.length === 0){
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowDate = tomorrow.toISOString().split('T')[0];
+            
+            tasks.push(createTask('晨跑 30 分鐘', '運動', 'normal', null, null));
+            tasks.push(createTask('整理工作報告', '工作', 'urgent', tomorrowDate, '10:00'));
+            tasks.push(createTask('閱讀 30 分鐘英文', '自我成長', 'important', tomorrowDate, '20:30'));
+            save(); 
+        }
+
+        // 4. 執行最終渲染
+        render(); 
+    }
+
+    // 啟動應用程式
+    initialize();
