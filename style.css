@@ -1,7 +1,7 @@
 :root{
-    /* 主題色 */
-    --primary:#EA7500;
-    --primary-dark:#c46000;
+    /* 主題色 - 已修改為您的名字風格顏色 */
+    --primary: #3498db; /* <-- 請將此顏色替換為您代表名字的顏色，例如 #FF5733 (橘紅) 或 #007bff (亮藍) */
+    --primary-dark:#2874a6; /* 這是上面 primary 顏色的深色版本 */
 
     --bg:#fdf7f2;
     --card:#ffffff;
@@ -20,13 +20,19 @@
 html,body{height:100%;margin:0;overflow-x:hidden}
 body{
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans TC', 'Helvetica Neue', Arial;
-    background:linear-gradient(180deg, #fff7f0 0%, var(--bg) 100%);
-    padding:28px;color:#0b1726;-webkit-font-smoothing:antialiased;
+    /* 新增背景圖片 */
+    background: url('./截圖\ 2025-11-28\ 下午5.27.49.png') no-repeat center center fixed; /* <-- 請確保圖片路徑正確 */
+    background-size: cover; /* 讓圖片覆蓋整個背景 */
+    background-attachment: fixed; /* 圖片不隨滾動條移動 */
+    
+    padding:28px;
+    color:#0b1726;
+    -webkit-font-smoothing:antialiased;
     line-height:1.5; /* 增加行高 */
 }
 
-/* 版面配置 */
-.container{
+/* 為了讓背景圖片清晰可見，我們需要讓容器背景半透明 */
+.container {
     width:100%;
     max-width:900px;
     margin:0 auto;
@@ -35,16 +41,23 @@ body{
     gap:24px;
     align-items:start;
     padding:0 12px;
+    /* 為內容容器添加半透明背景 */
+    background: rgba(255, 255, 255, 0.85); /* 白色半透明背景，讓文字更易讀 */
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: 0 12px 20px rgba(3,19,55,0.08);
 }
+
 
 header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 h1{margin:0;font-size:38px;color:var(--primary)}
 
 .card{
-    background:var(--card);
+    /* .card 內部不需要額外背景，因為 .container 已經處理了 */
+    background: none; 
     border-radius:var(--radius);
-    padding:24px; /* 增加卡片內邊距 */
-    box-shadow:0 12px 20px rgba(3,19,55,0.08); /* 更明顯的陰影 */
+    padding:0; /* 內部卡片不再需要 padding */
+    box-shadow:none; /* 內部卡片不需要陰影 */
 }
 
 /* 新增區塊 */
@@ -85,7 +98,7 @@ input:focus, select:focus, textarea:focus{
     background:var(--primary);
     color:#fff;border:none;padding:12px 18px; /* 增加按鈕內距 */
     border-radius:10px;cursor:pointer;font-size:16px;
-    box-shadow:0 4px 10px rgba(234,117,0,0.3);
+    box-shadow:0 4px 10px rgba(var(--primary-rgb),0.3); /* 使用 RGB 陰影 */
     transition:background .2s, box-shadow .2s;
     white-space:nowrap;
 }
@@ -96,7 +109,7 @@ input:focus, select:focus, textarea:focus{
     box-shadow:none;
 }
 .btn.secondary:hover{
-    background:rgba(234,117,0,0.05);
+    background:rgba(var(--primary-rgb),0.05);
 }
 
 /* 列表區 */
@@ -110,7 +123,7 @@ input:focus, select:focus, textarea:focus{
 .filter-btn.active{
     background:var(--primary);
     color:#fff;
-    box-shadow:0 2px 4px rgba(234,117,0,0.3);
+    box-shadow:0 2px 4px rgba(var(--primary-rgb),0.3);
 }
 .filter-btn:not(.active):hover{
     color:var(--primary);
@@ -124,7 +137,7 @@ input:focus, select:focus, textarea:focus{
     padding:14px 16px; /* 增加內距 */
     border-radius:12px;
     background:#ffffff;
-    border:1px solid #f5e7dd;
+    border:1px solid #f5e7dd; /* 邊框可以保留，讓每個任務有區隔 */
     position:relative;
     transition:background-color .2s;
 }
@@ -199,7 +212,8 @@ input:focus, select:focus, textarea:focus{
 .tags{display:flex;gap:8px;flex-wrap:wrap}
 .tag{
     padding:4px 10px;border-radius:999px;font-size:13px;
-    background:#fff1e6;color:var(--primary);border:1px solid #ffd8b8;
+    background:rgb(from var(--primary) r g b / 15%); /* 使用 primary 顏色作為標籤背景 */
+    color:var(--primary);border:1px solid rgb(from var(--primary) r g b / 30%);
     cursor:pointer;
 }
 
@@ -227,7 +241,7 @@ input:focus, select:focus, textarea:focus{
 /* 空狀態 */
 .empty-state{
     padding:30px;border-radius:12px;
-    background:linear-gradient(180deg,#fffaf4,#ffffff);
+    background:linear-gradient(180deg, rgba(255,250,244,0.7), rgba(255,255,255,0.7)); /* 半透明背景 */
     text-align:center;color:var(--muted);
     font-size:18px;
     border:2px dashed #f0e0d0;
