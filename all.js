@@ -5,6 +5,10 @@
 
     let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
     let categories = JSON.parse(localStorage.getItem(CATEGORIES_KEY)) || DEFAULT_CATEGORIES; 
+    
+    // 🔔 通知狀態和計時器
+    let notificationAllowed = 'default';
+    const notificationTimers = {}; // 用於儲存提醒計時器
 
     // DOM
     const taskInput = document.getElementById('taskInput');
@@ -43,8 +47,64 @@
     function createTask(text, category='其他', priority='normal', dueDate=null, dueTime='23:59'){
       return {id:uid(),text,category,priority,done:false,created:Date.now(),dueDate,dueTime}
     }
+    
+    // --- 通知提醒功能 ---
+    
+    // 請求通知權限
+    function requestNotificationPermission(){
+        if(!('Notification' in window)) {
+            console.warn('瀏覽器不支援通知');
+            alert('您的瀏覽器不支援提醒通知功能。');
+            return;
+        }
+        
+        Notification.requestPermission().then(permission => {
+            notificationAllowed = permission;
+            if(permission === 'granted'){
+                alert('已成功取得通知權限！在行動裝置上，時間到時將會震動提醒！');
+            } else {
+                alert('未允許通知，將無法收到提醒。');
+            }
+            // 重新渲染編輯按鈕狀態
+            render(); 
+        });
+    }
 
-    // --- 類別管理功能 ---
+    // 設定任務提醒
+    function setTaskNotifications(){
+        // 清除所有舊的計時器
+        Object.values(notificationTimers).forEach(clearTimeout);
+        Object.keys(notificationTimers).forEach(key => delete notificationTimers[key]);
+
+        if(notificationAllowed !== 'granted') return; 
+
+        const now = Date.now();
+        
+        tasks.filter(t => t.dueDate && !t.done).forEach(t => {
+            const [year, month, day] = t.dueDate.split('-').map(Number);
+            const [hour, minute] = (t.dueTime || '23:59').split(':').map(Number);
+            
+            // 月份是 0-indexed，需要減 1
+            const dueTimeMs = new Date(year, month-1, day, hour, minute, 0).getTime();
+            
+            const delay = dueTimeMs - now;
+
+            if(delay > 0){
+                notificationTimers[t.id] = setTimeout(() => {
+                    new Notification('⏰ 待辦事項提醒', {
+                        body: t.text + ' (' + t.category + ')',
+                        icon: './todo.png',
+                        // 新增震動指令：iOS 上會被忽略，但在 Android 上有效
+                        vibrate: [200, 100, 200] 
+                    });
+                    delete notificationTimers[t.id]; 
+                }, delay);
+            }
+        });
+    }
+
+
+    // --- 類別管理功能 (不變) ---
 
     // 渲染主畫面上的類別選擇框
     function renderCategorySelect(){
@@ -286,6 +346,9 @@
 
         todoList.appendChild(el);
       })
+      
+      // 🔔 重新設定所有提醒
+      setTaskNotifications();
     }
 
     // 內嵌編輯（雙擊）
@@ -333,12 +396,6 @@
       form.style.gap='12px';
       form.style.gridTemplateColumns = '1fr 1fr'; // 讓日期和時間並排
 
-      const tLabel = document.createElement('div'); tLabel.textContent = '任務內容';
-      const cLabel = document.createElement('div'); cLabel.textContent = '分類';
-      const pLabel = document.createElement('div'); pLabel.textContent = '優先度';
-      const dLabel = document.createElement('div'); dLabel.textContent = '截止日期';
-      const tmLabel = document.createElement('div'); tmLabel.textContent = '截止時間';
-
       // 文字
       const tInput = document.createElement('input'); 
       tInput.value = task.text; 
@@ -360,6 +417,14 @@
       const dInput = document.createElement('input'); dInput.type = 'date'; dInput.value = task.dueDate || '';
       const tmInput = document.createElement('input'); tmInput.type = 'time'; tmInput.value = task.dueTime || '23:59';
       
+      // 🔔 提醒按鈕 
+      const reminderBtn = document.createElement('button');
+      reminderBtn.className = 'btn secondary';
+      reminderBtn.style.fontSize = '14px';
+      reminderBtn.style.gridColumn = '1 / span 2'; // 佔滿兩欄
+      reminderBtn.textContent = (notificationAllowed === 'granted') ? '✅ 已允許通知' : '🔔 請求通知權限';
+      reminderBtn.onclick = requestNotificationPermission;
+
       // 添加元素到表單 (調整順序以符合 grid 排版)
       form.appendChild(tInput); 
       form.appendChild(cSel); 
@@ -367,6 +432,7 @@
       
       form.appendChild(dInput); 
       form.appendChild(tmInput); 
+      form.appendChild(reminderBtn); // 加入按鈕
 
       modalBody.appendChild(form);
       
@@ -412,6 +478,13 @@
 
     // 初始畫面
     renderCategorySelect(); // 載入類別
+    // 首次載入時，請求通知權限
+    if(Notification.permission === 'default') {
+        // 如果還沒詢問過，在初始化時先請求一次權限，防止用戶錯過 Modal 裡的按鈕。
+        // 但這裡我們保持在 Modal 裡提醒，因為太早彈出可能讓用戶拒絕。
+    } else {
+        notificationAllowed = Notification.permission;
+    }
     render();
 
     // 範例資料（如果沒有資料則建立 demo，並增加日期欄位）
