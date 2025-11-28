@@ -48,7 +48,7 @@
       return {id:uid(),text,category,priority,done:false,created:Date.now(),dueDate,dueTime}
     }
     
-    // --- 通知提醒功能 (無變動) ---
+    // --- 通知提醒功能 ---
     
     // 請求通知權限
     function requestNotificationPermission(){
@@ -387,37 +387,67 @@
       sel.addEventListener('blur', ()=>{ save(); render(); });
     }
 
-    // 全面編輯（包含標籤、優先度、日期時間）
+    // 【替換後的優化函式：openFullEdit】
     function openFullEdit(task, isNew=false){
       modalTitle.textContent = isNew ? '設定任務細節' : '編輯任務';
       modalBody.innerHTML = '';
-      const form = document.createElement('div');
-      form.style.display='grid'; 
-      form.style.gap='12px';
-      form.style.gridTemplateColumns = '1fr 1fr'; // 讓日期和時間並排
-
-      // 文字
-      const tInput = document.createElement('input'); 
-      tInput.value = task.text; 
-      tInput.style.gridColumn = '1 / span 2'; // 佔滿兩欄
       
-      // 分類
+      // 使用新的 modal-form-grid 類別進行排版
+      const form = document.createElement('div');
+      form.className = 'modal-form-grid';
+
+      // 1. 任務內容 (佔滿兩欄)
+      const tGroup = document.createElement('div');
+      tGroup.className = 'modal-form-group full-width';
+      tGroup.innerHTML = '<label for="modalTaskText">任務內容</label>';
+      const tInput = document.createElement('input'); 
+      tInput.id = 'modalTaskText';
+      tInput.value = task.text; 
+      tGroup.appendChild(tInput);
+
+      // 2. 分類
+      const cGroup = document.createElement('div');
+      cGroup.className = 'modal-form-group';
+      cGroup.innerHTML = '<label for="modalCategory">類別</label>';
       const cSel = document.createElement('select'); 
+      cSel.id = 'modalCategory';
       categories.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v; if(v===task.category) o.selected=true; cSel.appendChild(o)});
       const manageOption = document.createElement('option');
       manageOption.value = 'manage'; manageOption.textContent = '⚙️ 管理類別'; cSel.appendChild(manageOption);
       cSel.addEventListener('change', ()=>{ 
         if(cSel.value === 'manage'){ openCategoryManager(); cSel.value = task.category; }
       });
+      cGroup.appendChild(cSel);
       
-      // 優先
-      const pSel = document.createElement('select'); [['urgent','緊急'],['important','重要'],['normal','一般']].forEach(a=>{const o=document.createElement('option');o.value=a[0];o.textContent=a[1]; if(a[0]===task.priority) o.selected=true; pSel.appendChild(o)});
+      // 3. 優先度
+      const pGroup = document.createElement('div');
+      pGroup.className = 'modal-form-group';
+      pGroup.innerHTML = '<label for="modalPriority">優先度</label>';
+      const pSel = document.createElement('select'); 
+      pSel.id = 'modalPriority';
+      [['urgent','緊急'],['important','重要'],['normal','一般']].forEach(a=>{const o=document.createElement('option');o.value=a[0];o.textContent=a[1]; if(a[0]===task.priority) o.selected=true; pSel.appendChild(o)});
+      pGroup.appendChild(pSel);
 
-      // 日期和時間輸入
-      const dInput = document.createElement('input'); dInput.type = 'date'; dInput.value = task.dueDate || '';
-      const tmInput = document.createElement('input'); tmInput.type = 'time'; tmInput.value = task.dueTime || '23:59';
+
+      // 4. 截止日期
+      const dGroup = document.createElement('div');
+      dGroup.className = 'modal-form-group';
+      dGroup.innerHTML = '<label for="modalDueDate">截止日期</label>';
+      const dInput = document.createElement('input'); 
+      dInput.id = 'modalDueDate';
+      dInput.type = 'date'; dInput.value = task.dueDate || '';
+      dGroup.appendChild(dInput);
+
+      // 5. 截止時間
+      const tmGroup = document.createElement('div');
+      tmGroup.className = 'modal-form-group';
+      tmGroup.innerHTML = '<label for="modalDueTime">截止時間</label>';
+      const tmInput = document.createElement('input'); 
+      tmInput.id = 'modalDueTime';
+      tmInput.type = 'time'; tmInput.value = task.dueTime || '23:59';
+      tmGroup.appendChild(tmInput);
       
-      // 🔔 提醒按鈕 
+      // 6. 提醒按鈕 (佔滿兩欄)
       const reminderBtn = document.createElement('button');
       reminderBtn.className = 'btn secondary';
       reminderBtn.style.fontSize = '14px';
@@ -425,13 +455,12 @@
       reminderBtn.textContent = (notificationAllowed === 'granted') ? '✅ 已允許通知' : '🔔 請求通知權限';
       reminderBtn.onclick = requestNotificationPermission;
 
-      // 添加元素到表單 (調整順序以符合 grid 排版)
-      form.appendChild(tInput); 
-      form.appendChild(cSel); 
-      form.appendChild(pSel);
-      
-      form.appendChild(dInput); 
-      form.appendChild(tmInput); 
+      // 添加所有元素到表單
+      form.appendChild(tGroup); 
+      form.appendChild(cGroup); 
+      form.appendChild(pGroup);
+      form.appendChild(dGroup); 
+      form.appendChild(tmGroup); 
       form.appendChild(reminderBtn); // 加入按鈕
 
       modalBody.appendChild(form);

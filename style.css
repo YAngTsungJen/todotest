@@ -71,7 +71,7 @@ input:focus, select:focus, textarea:focus{
     box-shadow:0 0 0 2px #fde6d8;
 }
 
-/* Modal 裡的輸入框 */
+/* Modal 裡的輸入框 (基礎樣式) */
 .modal input[type="date"], .modal input[type="time"], .modal select{
     font-size:16px; /* Modal 裡字體小一點 */
     padding:10px 12px;
@@ -242,12 +242,45 @@ input:focus, select:focus, textarea:focus{
 }
 .modal h3{font-size:24px;margin-top:0;}
 
+/* --- Modal 內部表單優化 (新增) --- */
+.modal-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* Modal 內表單的標籤（Label）樣式 */
+.modal-form-grid label {
+    font-size: 15px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block; /* 讓 label 獨立一行 */
+}
+
+/* 將 Label 和 Input/Select 包裝在一起 */
+.modal-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 讓任務內容輸入框佔滿兩欄 */
+.modal-form-group.full-width {
+    grid-column: 1 / span 2;
+}
+
+
 /* 行動裝置優化 */
 @media (max-width:600px){
     body{padding:16px;}
     .container{padding:0;}
     h1{font-size:32px;}
     .card{padding:16px;}
+    
+    /* PWA 模式在小螢幕上，Modal 內的欄位也變成單欄 */
+    .modal-form-grid {
+        grid-template-columns: 1fr;
+    }
 
     .new-task .controls{
         flex-direction:column;
